@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+
+<!-- SEO Meta Tags -->
+<meta name="description" content="Elite Studio - 360° Creative & Infrastructure Agency. Minecraft Setup, Video Production, Discord Customization, and Elite Hosting.">
+<meta name="keywords" content="Minecraft Agency, Video Editing, Discord Setup, Script Writing, Elite Studio">
+<meta property="og:title" content="Elite Studio | Premier Creative Powerhouse">
+<meta property="og:description" content="Elevating Digital Stories through Elite Execution.">
+<meta property="og:image" content="link-to-your-logo.png">
+<link rel="icon" type="image/x-icon" href="favicon.ico">
+
+    <meta charset="UTF-8">
+    <title>Elite Studio | Admin Login</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .login-box {
+            background: var(--glass); padding: 40px; border-radius: 20px;
+            border: 1px solid var(--border); width: 350px; margin: 100px auto; text-align: center;
+        }
+        input {
+            width: 100%; padding: 12px; margin: 10px 0; background: #111;
+            border: 1px solid var(--border); color: white; border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="login-box">
+        <h2 style="color: var(--primary);">Admin Access</h2>
+        <input type="text" id="username" placeholder="Username">
+        <input type="password" id="password" placeholder="Password">
+        <button onclick="checkLogin()" class="btn-cta" style="width: 100%; border:none; margin-top:10px;">Login</button>
+    </div>
+
+    <script>
+        function checkLogin() {
+            var user = document.getElementById("username").value;
+            var pass = document.getElementById("password").value;
+            if(user == "admin" && pass == "elite123") { // Change your password here
+                window.location.href = "admin.html";
+            } else {
+                alert("Wrong Credentials!");
+            }
+        }
+    </script>
+</body>
+</html>

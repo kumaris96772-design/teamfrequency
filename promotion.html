@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>TF // Social Engine</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        body { background: #fafafa; color: #1a1a1a; font-family: -apple-system, sans-serif; margin: 0; padding-top: 100px; }
+        .mobile-shell { max-width: 420px; margin: 0 auto; background: #fff; border: 8px solid #1a1a1a; border-radius: 40px; overflow: hidden; box-shadow: 0 50px 100px rgba(168, 85, 247, 0.2); }
+        .app-header { padding: 15px; border-bottom: 1px solid #eee; text-align: center; font-weight: 800; color: var(--purple); font-size: 14px; letter-spacing: 2px; }
+        
+        .post { border-bottom: 1px solid #eee; margin-bottom: 20px; }
+        .post-info { padding: 10px 15px; display: flex; align-items: center; gap: 10px; font-size: 13px; font-weight: bold; }
+        .pfp { width: 30px; height: 30px; background: var(--purple); border-radius: 50%; }
+        
+        canvas { width: 100%; display: block; background: #000; }
+        .interactions { padding: 12px 15px; display: flex; gap: 15px; color: var(--purple); font-size: 20px; }
+        .caption { padding: 0 15px 15px; font-size: 13px; color: #555; }
+    </style>
+</head>
+<body>
+    <nav><a href="index.html" class="logo">TF <span>SOCIAL</span></a></nav>
+
+    <main class="mobile-shell">
+        <div class="app-header">FREQUENCY_FEED_v6.0</div>
+        <div id="feed-gallery"></div>
+    </main>
+
+    <script type="module">
+        import { db, applyEliteWatermark } from './config.js';
+        import { collection, getDocs, query, orderBy } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+        async function load() {
+            const snap = await getDocs(query(collection(db, "promotion"), orderBy("timestamp", "desc")));
+            const container = document.getElementById('feed-gallery');
+            snap.forEach(d => {
+                const data = d.data();
+                const id = `post-${d.id}`;
+                container.innerHTML += `
+                    <div class="post">
+                        <div class="post-info"><div class="pfp"></div> TF_OFFICIAL</div>
+                        <canvas id="${id}"></canvas>
+                        <div class="interactions"><span>💜</span> <span>💬</span> <span>⚡</span></div>
+                        <div class="caption">Successfully amplified <b>${data.title}</b> across all frequency bands.</div>
+                    </div>`;
+                applyEliteWatermark(id, data.link);
+            });
+        }
+        load();
+    </script>
+</body>
+</html>

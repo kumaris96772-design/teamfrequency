@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>TF // Talent Registry</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        body { background: #000; color: #fff; }
+        .registry-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 30px; padding: 120px 8%; }
+        
+        .profile-card { 
+            background: #0a0a0c; border: 1px solid var(--border); border-radius: 4px;
+            padding: 20px; transition: var(--smooth); border-top: 4px solid var(--purple);
+        }
+        .profile-card:hover { border-color: var(--purple); transform: translateY(-10px); }
+        
+        canvas { width: 100%; height: 350px; object-fit: cover; border-radius: 4px; filter: grayscale(1) contrast(1.1); transition: 0.5s; }
+        .profile-card:hover canvas { filter: grayscale(0); }
+
+        h3 { font-size: 20px; margin: 15px 0 5px 0; text-transform: uppercase; }
+        .role-badge { font-size: 11px; font-weight: bold; color: var(--purple); letter-spacing: 2px; }
+    </style>
+</head>
+<body>
+    <nav><a href="index.html" class="logo">TF <span>CASTING</span></a></nav>
+
+    <main class="registry-grid" id="casting-gallery"></main>
+
+    <script type="module">
+        import { db, applyEliteWatermark } from './config.js';
+        import { collection, getDocs, query, orderBy } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+        async function load() {
+            const snap = await getDocs(query(collection(db, "casting"), orderBy("timestamp", "desc")));
+            const container = document.getElementById('casting-gallery');
+            snap.forEach(d => {
+                const data = d.data();
+                const id = `cast-${d.id}`;
+                container.innerHTML += `
+                    <div class="profile-card">
+                        <canvas id="${id}"></canvas>
+                        <div class="role-badge">ROLE: VERIFIED_TALENT</div>
+                        <h3>${data.title}</h3>
+                    </div>`;
+                applyEliteWatermark(id, data.link);
+            });
+        }
+        load();
+    </script>
+</body>
+</html>

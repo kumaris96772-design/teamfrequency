@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>TF // Live Events</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        body { background: #000; font-family: 'Plus Jakarta Sans', sans-serif; }
+        .stage-header { height: 40vh; background: linear-gradient(to bottom, #1a0b2e, #000); display: flex; align-items: center; justify-content: center; border-bottom: 2px solid var(--purple); }
+        
+        .events-grid { padding: 60px 8%; display: flex; flex-direction: column; gap: 30px; align-items: center; }
+        
+        .event-pass { 
+            display: flex; width: 100%; max-width: 800px; background: #fff; color: #000; 
+            border-radius: 20px; overflow: hidden; position: relative;
+            transition: var(--smooth);
+        }
+        .event-pass:hover { transform: scale(1.02) rotate(-1deg); }
+        
+        .pass-side { width: 80px; background: var(--purple); border-right: 3px dashed #000; display: flex; align-items: center; justify-content: center; writing-mode: vertical-rl; font-weight: 900; letter-spacing: 5px; }
+        .pass-main { flex: 1; padding: 30px; display: flex; gap: 25px; align-items: center; }
+        
+        canvas { width: 250px; height: 150px; object-fit: cover; border-radius: 10px; border: 2px solid #000; }
+        h2 { font-size: 32px; letter-spacing: -2px; margin: 0; }
+        .meta { font-family: monospace; font-size: 12px; color: #666; margin-top: 10px; }
+    </style>
+</head>
+<body>
+    <nav><a href="index.html" class="logo">TF <span>EVENTS</span></a></nav>
+
+    <header class="stage-header">
+        <h1 style="font-size: 60px; letter-spacing: -4px;">Live <span style="color:var(--purple)">Frequency</span></h1>
+    </header>
+
+    <main class="events-grid" id="event-list"></main>
+
+    <script type="module">
+        import { db, applyEliteWatermark } from './config.js';
+        import { collection, getDocs, query, orderBy } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+        async function load() {
+            const snap = await getDocs(query(collection(db, "events"), orderBy("timestamp", "desc")));
+            const container = document.getElementById('event-list');
+            snap.forEach(d => {
+                const data = d.data();
+                const id = `tkt-${d.id}`;
+                container.innerHTML += `
+                    <div class="event-pass">
+                        <div class="pass-side">EVENT_LOG</div>
+                        <div class="pass-main">
+                            <canvas id="${id}"></canvas>
+                            <div>
+                                <h2>${data.title}</h2>
+                                <div class="meta">FREQUENCY: STABLE<br>ACCESS_GRANTED: YES</div>
+                            </div>
+                        </div>
+                    </div>`;
+                applyEliteWatermark(id, data.link);
+            });
+        }
+        load();
+    </script>
+</body>
+</html>

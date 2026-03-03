@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>TF // Transmission Received</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        body { background: #000; height: 100vh; display: flex; align-items: center; justify-content: center; overflow: hidden; }
+        .success-wrap { text-align: center; max-width: 800px; padding: 40px; position: relative; }
+        
+        .glow-orb { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 400px; height: 400px; background: var(--purple); filter: blur(150px); opacity: 0.15; z-index: -1; animation: pulse 4s infinite; }
+        @keyframes pulse { 0% { opacity: 0.1; transform: translate(-50%, -50%) scale(1); } 50% { opacity: 0.3; transform: translate(-50%, -50%) scale(1.2); } 100% { opacity: 0.1; transform: translate(-50%, -50%) scale(1); } }
+
+        h1 { font-size: clamp(40px, 8vw, 100px); letter-spacing: -0.05em; line-height: 0.9; margin-bottom: 30px; }
+        h1 i { font-family: var(--font-heading); font-style: italic; color: var(--purple); }
+        
+        .ticket-id { display: inline-block; padding: 10px 20px; background: #111; border: 1px solid var(--border); border-radius: 100px; font-family: monospace; color: #555; font-size: 12px; margin-bottom: 40px; }
+        .ticket-id b { color: var(--purple); }
+    </style>
+</head>
+<body>
+    <div class="glow-orb"></div>
+    <div class="success-wrap">
+        <p style="letter-spacing: 5px; color: var(--purple); font-weight: 800; font-size: 11px; margin-bottom: 20px;">[ CONNECTION_ESTABLISHED ]</p>
+        <h1>Signal <i>Successfully</i> <br> Transmitted.</h1>
+        <p style="color:var(--text-dim); font-size: 1.2rem; margin-bottom: 30px;">Our core strategists are now calibrating your project data. Expect a response on your provided frequency within 12-24 hours.</p>
+        
+        <div class="ticket-id">YOUR_SESSION_ID: <b id="sid">GENERATING...</b></div>
+        
+        <br>
+        <a href="index.html" class="btn-sync">Return to Hub</a>
+    </div>
+
+    <script>
+        // Fake ID generation for user satisfaction
+        document.getElementById('sid').innerText = "TF_" + Math.random().toString(36).substr(2, 9).toUpperCase();
+    </script>
+</body>
+</html>

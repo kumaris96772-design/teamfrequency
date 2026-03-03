@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>TF // Engagement Sync</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        body { background: #0a0a0a; color: #fff; }
+        .pulse-line { width: 100%; height: 1px; background: var(--purple); position: fixed; top: 50%; opacity: 0.1; animation: pulse 2s infinite alternate; }
+        @keyframes pulse { from { opacity: 0.1; transform: scaleY(1); } to { opacity: 0.4; transform: scaleY(50); } }
+
+        .growth-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 25px; padding: 120px 8%; }
+        .sync-card { 
+            background: #111; border: 1px solid var(--border); border-left: 5px solid var(--purple);
+            padding: 30px; border-radius: 4px; transition: 0.3s;
+        }
+        .sync-card:hover { background: #16121a; border-color: var(--purple); }
+        
+        .metric-pulse { font-size: 11px; font-weight: 800; color: var(--purple); text-transform: uppercase; margin-bottom: 10px; }
+        canvas { width: 100%; border-radius: 4px; margin-bottom: 15px; opacity: 0.8; }
+        
+        .engagement-bar { width: 100%; height: 3px; background: #222; margin-top: 15px; }
+        .fill { width: 88%; height: 100%; background: var(--purple); box-shadow: 0 0 10px var(--purple); }
+    </style>
+</head>
+<body>
+    <div class="pulse-line"></div>
+    <nav>
+        <a href="index.html" class="logo">TF <span>STRATEGY</span></a>
+        <a href="order.html" class="btn-cta">SYNC CHANNEL</a>
+    </nav>
+
+    <main class="growth-grid" id="strat-list"></main>
+
+    <script type="module">
+        import { db, applyEliteWatermark } from './config.js';
+        import { collection, getDocs, query, orderBy } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+        async function load() {
+            const snap = await getDocs(query(collection(db, "growth"), orderBy("timestamp", "desc")));
+            const container = document.getElementById('strat-list');
+            snap.forEach(d => {
+                const data = d.data();
+                const id = `sync-${d.id}`;
+                container.innerHTML += `
+                    <div class="sync-card">
+                        <div class="metric-pulse">Syncing Engagement // 94%</div>
+                        <canvas id="${id}"></canvas>
+                        <h3>${data.title}</h3>
+                        <div class="engagement-bar"><div class="fill"></div></div>
+                    </div>`;
+                applyEliteWatermark(id, data.link);
+            });
+        }
+        load();
+    </script>
+</body>
+</html>

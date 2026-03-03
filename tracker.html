@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Signal Tracker | Team Frequency</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body { background: #000; color: #fff; }
+
+        /* --- TRACKER HEADER --- */
+        .tracker-header { padding: 180px 8% 60px; text-align: center; }
+        .tracker-header h1 { font-size: clamp(40px, 8vw, 100px); font-weight: 800; letter-spacing: -0.06em; line-height: 0.9; }
+        .tracker-header h1 i { font-family: 'Instrument Serif', serif; font-style: italic; color: var(--purple); font-weight: 400; }
+
+        /* --- SEARCH BOX --- */
+        .tracker-search { max-width: 700px; margin: 0 auto 100px; position: relative; }
+        .tracker-search input { 
+            width: 100%; padding: 25px 40px; background: #09090b; border: 1px solid var(--border); 
+            border-radius: 100px; color: #fff; font-size: 18px; outline: none; transition: 0.4s;
+        }
+        .tracker-search input:focus { border-color: #fff; box-shadow: 0 0 50px rgba(168, 85, 247, 0.1); }
+        .tracker-btn { position: absolute; right: 10px; top: 10px; background: #fff; color: #000; border: none; padding: 15px 35px; border-radius: 100px; font-weight: 800; cursor: pointer; }
+
+        /* --- STATUS MONITOR --- */
+        #status-card { display: none; max-width: 900px; margin: 0 auto; background: #0d0d0f; border: 1px solid var(--border); border-radius: 40px; padding: 80px 60px; }
+        
+        .sync-timeline { display: flex; justify-content: space-between; position: relative; margin-bottom: 60px; }
+        .sync-line { position: absolute; top: 20px; left: 0; width: 100%; height: 1px; background: var(--border); z-index: 1; }
+        .sync-progress { position: absolute; top: 20px; left: 0; height: 1px; background: var(--purple); width: 0%; z-index: 2; transition: 1.5s cubic-bezier(0.19, 1, 0.22, 1); box-shadow: 0 0 15px var(--purple); }
+
+        .sync-node { position: relative; z-index: 3; text-align: center; width: 100px; }
+        .node-dot { width: 40px; height: 40px; background: #000; border: 1px solid var(--border); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 15px; font-size: 12px; font-weight: 800; transition: 0.5s; }
+        .sync-node.active .node-dot { background: #fff; color: #000; border-color: #fff; box-shadow: 0 0 30px rgba(255,255,255,0.2); }
+        .sync-node.active p { color: #fff; opacity: 1; }
+        .sync-node p { font-size: 10px; color: #444; letter-spacing: 2px; font-weight: 800; }
+
+        .live-log { background: #000; border: 1px solid var(--border); border-radius: 20px; padding: 30px; font-family: monospace; color: #555; line-height: 1.8; }
+        .live-log b { color: var(--purple); }
+
+        @media (max-width: 768px) {
+            .sync-timeline { flex-direction: column; gap: 40px; align-items: flex-start; }
+            .sync-line, .sync-progress { display: none; }
+            .sync-node { display: flex; gap: 20px; text-align: left; width: 100%; }
+            #status-card { padding: 40px 25px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="grid-overlay"></div>
+    <nav>
+        <a href="index.html" class="logo">TF <span>TRACKER</span></a>
+        <a href="index.html" class="btn-sync" style="background:transparent; border:1px solid #222; color:#fff; padding:10px 25px; font-size:12px; border-radius:50px; text-decoration:none; font-weight:700;">Back to Hub</a>
+    </nav>
+
+    <main class="tracker-main">
+        <header class="tracker-header">
+            <p style="color:var(--purple); font-weight: 800; letter-spacing: 4px;">[ ENCRYPTED_SYNC_PROTOCOL ]</p>
+            <h1>Signal <i>Tracker</i></h1>
+        </header>
+
+        <div class="search-container" style="padding: 0 8%;">
+            <div class="tracker-search">
+                <input type="text" id="ticket-id" placeholder="ENTER TRANSMISSION_ID (Ex: TF_88JK...)">
+                <button class="tracker-btn" onclick="trackSignal()">SYNC</button>
+            </div>
+        </div>
+
+        <div id="status-card">
+            <div class="sync-timeline">
+                <div class="sync-line"></div>
+                <div class="sync-progress" id="progress-bar"></div>
+                <div class="sync-node" id="n1"><div class="node-dot">01</div><p>RECEIVED</p></div>
+                <div class="sync-node" id="n2"><div class="node-dot">02</div><p>CALIBRATING</p></div>
+                <div class="sync-node" id="n3"><div class="node-dot">03</div><p>REFINING</p></div>
+                <div class="sync-node" id="n4"><div class="node-dot">04</div><p>BROADCAST</p></div>
+            </div>
+            
+            <h2 id="p-title" style="font-size: 36px; margin-bottom: 25px; letter-spacing: -2px;">Project <i>Name</i></h2>
+            <div class="live-log" id="p-log">> INITIALIZING_SECURE_CONNECTION... OK</div>
+        </div>
+    </main>
+
+    <script type="module">
+        import { db } from './config.js';
+        import { doc, getDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+        window.trackSignal = async () => {
+            const id = document.getElementById('ticket-id').value.trim();
+            if(!id) return;
+
+            const snap = await getDoc(doc(db, "orders", id));
+            if(snap.exists()) {
+                const data = snap.data();
+                document.getElementById('status-card').style.display = "block";
+                document.getElementById('p-title').innerHTML = `${data.name}'s <i>${data.service}</i>`;
+                document.getElementById('p-log').innerHTML = `<b>> CURRENT_STATUS:</b> ${data.status || 'Received'}<br><b>> SYSTEM_MESSAGE:</b> ${data.adminNote || 'Establishing core strategist sync...'}<br><b>> ENCRYPTION:</b> 256-BIT_AES_STABLE`;
+                
+                updateVisuals(data.status);
+                document.getElementById('status-card').scrollIntoView({ behavior: 'smooth' });
+            } else {
+                alert("SIGNAL_NOT_FOUND: Check ID and re-transmit.");
+            }
+        };
+
+        function updateVisuals(status) {
+            const map = { "New": 1, "In Progress": 2, "Review": 3, "Completed": 4 };
+            const level = map[status] || 1;
+            document.getElementById('progress-bar').style.width = ((level - 1) / 3 * 100) + "%";
+            for(let i=1; i<=4; i++) {
+                document.getElementById('n' + i).classList.toggle('active', i <= level);
+            }
+        }
+    </script>
+</body>
+</html>

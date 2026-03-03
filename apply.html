@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Apply for Sync | Team Frequency</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body { background: #000; color: #fff; overflow-x: hidden; }
+        
+        /* Grid Overlay from Master Style */
+        .grid-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background-image: 
+                linear-gradient(rgba(255, 255, 255, 0.02) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
+            background-size: 60px 60px; z-index: -1;
+        }
+
+        /* --- HEADER --- */
+        .apply-header { padding: 180px 8% 60px; text-align: center; }
+        .apply-header h1 { 
+            font-size: clamp(45px, 9vw, 100px); 
+            font-weight: 800; 
+            letter-spacing: -0.06em; 
+            margin: 0; 
+        }
+        .apply-header h1 i { 
+            font-family: 'Instrument Serif', serif; 
+            font-style: italic; 
+            color: var(--purple); 
+            font-weight: 400; 
+        }
+
+        /* --- FORM UI --- */
+        .apply-container {
+            max-width: 800px;
+            margin: 0 auto 150px;
+            padding: 80px 60px;
+            background: #09090b; /* Professional dark surface */
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 48px;
+            position: relative;
+        }
+
+        .input-group { margin-bottom: 35px; }
+        
+        .input-group label {
+            display: block;
+            font-size: 10px;
+            font-weight: 800;
+            color: var(--purple);
+            letter-spacing: 4px;
+            text-transform: uppercase;
+            margin-bottom: 15px;
+            opacity: 0.8;
+        }
+
+        /* SaaS Style Inputs */
+        input {
+            width: 100%;
+            background: #000 !important;
+            border: 1px solid rgba(255, 255, 255, 0.08) !important;
+            padding: 20px 25px !important;
+            color: #fff !important;
+            border-radius: 16px !important;
+            font-size: 16px !important;
+            transition: 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+            outline: none;
+        }
+
+        input:focus {
+            border-color: var(--purple) !important;
+            box-shadow: 0 0 30px rgba(168, 85, 247, 0.1);
+            transform: scale(1.01);
+        }
+
+        /* --- BUTTON --- */
+        .btn-transmit {
+            width: 100%;
+            padding: 22px !important;
+            background: #fff !important;
+            color: #000 !important;
+            border: none !important;
+            border-radius: 100px !important;
+            font-weight: 800 !important;
+            font-size: 14px !important;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            cursor: pointer;
+            transition: 0.4s;
+            margin-top: 20px;
+        }
+
+        .btn-transmit:hover {
+            background: var(--purple) !important;
+            color: #fff !important;
+            box-shadow: 0 15px 40px rgba(168, 85, 247, 0.3);
+            transform: translateY(-3px);
+        }
+
+        #status-msg {
+            margin-top: 25px;
+            text-align: center;
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        @media (max-width: 600px) {
+            .apply-container { padding: 40px 25px; border-radius: 30px; }
+            .apply-header h1 { font-size: 50px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="grid-overlay"></div>
+
+    <!-- NAVIGATION -->
+    <nav>
+        <a href="index.html" class="logo">TF <span>SYNC</span></a>
+        <a href="index.html" class="btn-sync" style="background:transparent; border: 1px solid #222; color:#fff; padding:10px 25px; font-size:12px; border-radius:50px; text-decoration:none; font-weight:700;">Back to Hub</a>
+    </nav>
+
+    <!-- HEADER -->
+    <header class="apply-header">
+        <p style="color:var(--purple); font-weight: 800; letter-spacing: 3px; margin-bottom: 20px;">[ TALENT_RECRUITMENT_V9 ]</p>
+        <h1>Apply for <i>Sync</i></h1>
+        <p style="color:var(--text-dim); margin-top: 20px; font-size: 1.1rem; max-width: 600px; margin-left: auto; margin-right: auto;">
+            Our talent scouts are looking for creators who define the next digital frequency. Transmit your stats below.
+        </p>
+    </header>
+
+    <!-- FORM SECTION -->
+    <main class="apply-container">
+        <form id="applyForm">
+            <div class="input-group">
+                <label>your Gmail </label>
+                <input type="text" id="a-link" placeholder="example@gmail.com" required>
+            </div>
+
+            <div class="input-group">
+                <label>Average_Transmission_Views</label>
+                <input type="text" id="a-views" placeholder="Ex: 50,000 per video" required>
+            </div>
+
+            <button type="submit" class="btn-transmit" id="sub-btn">Transmit Application</button>
+        </form>
+        <p id="status-msg"></p>
+    </main>
+
+    <footer style="text-align: center; padding: 60px; color: #222; font-size: 12px; border-top: 1px solid rgba(255,255,255,0.03);">
+        <p>&copy; 2026 TEAM FREQUENCY. Signals Monitored.</p>
+    </footer>
+
+    <script type="module">
+        import { db } from './config.js';
+        import { collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+        const form = document.getElementById('applyForm');
+        const btn = document.getElementById('sub-btn');
+        const status = document.getElementById('status-msg');
+
+        form.onsubmit = async (e) => {
+            e.preventDefault();
+            
+            btn.innerText = "UPLOADING DATA...";
+            btn.disabled = true;
+
+            try {
+                await addDoc(collection(db, "applications"), {
+                    channel: document.getElementById('a-link').value,
+                    views: document.getElementById('a-views').value,
+                    timestamp: serverTimestamp(),
+                    status: "Pending"
+                });
+
+                status.innerText = "✅ SIGNAL RECEIVED. We will contact you soon.";
+                status.style.color = "var(--purple)";
+                btn.innerText = "TRANSMITTED";
+                form.reset();
+            } catch (err) {
+                status.innerText = "❌ CONNECTION_ERROR: " + err.message;
+                status.style.color = "red";
+                btn.disabled = false;
+                btn.innerText = "RETRY TRANSMISSION";
+            }
+        };
+    </script>
+</body>
+</html>

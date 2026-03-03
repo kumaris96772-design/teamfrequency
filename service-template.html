@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Portfolio | Team Frequency</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        body { background: #000; color: #fff; }
+        .p-header { padding: 180px 8% 60px; text-align: center; }
+        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); gap: 20px; padding: 0 8% 100px; }
+        .card { background: #0d0d0f; border: 1px solid rgba(255,255,255,0.05); border-radius: 30px; padding: 20px; }
+        canvas { width: 100%; border-radius: 20px; }
+    </style>
+</head>
+<body>
+    <nav style="padding: 30px 8%; display: flex; justify-content: space-between; position: fixed; width: 100%; background: rgba(0,0,0,0.8); backdrop-filter: blur(10px); top: 0;">
+        <a href="index.html" style="color:#fff; text-decoration:none; font-weight:800;">TEAM FREQUENCY</a>
+        <a href="index.html" style="color:#a855f7; text-decoration:none; font-weight:800; font-size:12px;">BACK_TO_HUB</a>
+    </nav>
+
+    <header class="p-header">
+        <h1 id="live-h1" style="font-size:80px; letter-spacing:-4px;">...</h1>
+        <p id="live-p" style="color:#555;"></p>
+    </header>
+
+    <main class="grid" id="gallery"></main>
+
+    <script type="module">
+        import { db, applyEliteWatermark } from './config.js';
+        import { doc, onSnapshot, collection, getDocs, query, orderBy } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+        // 1. CHANGE THIS FOR EVERY PAGE (e.g., 'minecraft', 'discord', 'editing')
+        const PAGE_ID = "minecraft"; 
+
+        // 2. Sync Text
+        onSnapshot(doc(db, "settings", PAGE_ID), (s) => {
+            if(s.exists()){
+                document.getElementById('live-h1').innerHTML = s.data().h1;
+                document.getElementById('live-p').innerText = s.data().p;
+            }
+        });
+
+        // 3. Load Portfolio Assets
+        async function load() {
+            const snap = await getDocs(query(collection(db, PAGE_ID + "_portfolio"), orderBy("timestamp", "desc")));
+            const container = document.getElementById('gallery');
+            snap.forEach(d => {
+                const data = d.data();
+                const id = `cvs-${d.id}`;
+                container.innerHTML += `<div class="card"><canvas id="${id}"></canvas><h3 style="margin-top:20px; text-align:center;">${data.title}</h3></div>`;
+                applyEliteWatermark(id, data.link);
+            });
+        }
+        load();
+    </script>
+</body>
+</html>
