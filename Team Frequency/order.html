@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>TF // Connection Terminal</title>
+    <link rel="stylesheet" href="style.css">
+    <style id="dynamic-style">
+        :root { --p-color: #a855f7; --p-bg: #000; --p-font: 'Plus Jakarta Sans'; }
+        body { background: var(--p-bg); color: #fff; font-family: var(--p-font); transition: 0.8s; }
+        
+        .order-wrap { max-width: 800px; margin: 150px auto; padding: 60px; background: #0a0a0c; border: 1px solid var(--border); border-radius: 40px; }
+        h1 { font-size: 50px; letter-spacing: -3px; }
+        
+        input, select, textarea { width: 100%; background: #000; border: 1px solid var(--border); padding: 18px; border-radius: 12px; color: #fff; margin-bottom: 15px; }
+        input:focus { border-color: var(--p-color); }
+        
+        .submit-btn { width: 100%; padding: 20px; background: var(--p-color); color: #fff; border: none; border-radius: 12px; font-weight: 800; cursor: pointer; font-size: 16px; letter-spacing: 2px; transition: 0.3s; }
+        
+        /* THEMES */
+        .theme-mc { --p-color: #3c8527; --p-bg: #1a1a1a; --p-font: 'Courier New', monospace; }
+        .theme-ds { --p-color: #5865F2; --p-bg: #313338; }
+        .theme-edit { --p-color: #8b5cf6; --p-bg: #0d0d0f; }
+    </style>
+</head>
+<body>
+
+    <nav><a href="index.html" class="logo">TF <span>TERMINAL</span></a></nav>
+
+    <div class="order-wrap">
+        <p id="status-line" style="font-size: 10px; letter-spacing: 4px; color: var(--p-color);">[ WAITING_FOR_INPUT ]</p>
+        <h1 id="form-title">Establish <span style="color:var(--p-color)">Connection</span></h1>
+        
+        <form id="orderForm">
+            <select id="o-service" onchange="recalibrate(this.value)" required>
+                <option value="" disabled selected>Select Transmission Type...</option>
+                <option value="mc">Minecraft Infrastructure</option>
+                <option value="ds">Discord Customization</option>
+                <option value="edit">Video Production</option>
+                <option value="strat">Growth Strategy</option>
+            </select>
+
+            <div style="display:flex; gap:15px;">
+                <input type="text" id="o-name" placeholder="Full Name" required>
+                <input type="text" id="o-contact" placeholder="Discord ID / Email" required>
+            </div>
+            
+            <textarea id="o-msg" placeholder="Describe the project frequency..." rows="5" required></textarea>
+            
+            <button type="submit" class="submit-btn" id="sub-btn">TRANSMIT DATA</button>
+        </form>
+    </div>
+
+    <script type="module">
+        import { db } from './config.js';
+        import { collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+        // THEME RECALIBRATION
+        window.recalibrate = (val) => {
+            document.body.className = "theme-" + val;
+            document.getElementById('status-line').innerText = `[ ${val.toUpperCase()}_SIGNAL_LOCKED ]`;
+        };
+
+        // SUBMISSION
+        document.getElementById('orderForm').onsubmit = async (e) => {
+            e.preventDefault();
+            const btn = document.getElementById('sub-btn');
+            btn.innerText = "UPLOADING TO CORE...";
+            btn.disabled = true;
+
+            await addDoc(collection(db, "orders"), {
+                name: document.getElementById('o-name').value,
+                contact: document.getElementById('o-contact').value,
+                service: document.getElementById('o-service').value,
+                message: document.getElementById('o-msg').value,
+                timestamp: serverTimestamp()
+            });
+
+            window.location.href = "success.html";
+        };
+    </script>
+</body>
+</html>

@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>TF // Motion Studio</title>
+    <style>
+        body { background: #000; color: #fff; font-family: 'Plus Jakarta Sans', sans-serif; margin: 0; }
+        .studio-header { padding: 80px 8%; border-bottom: 1px solid #1a1a1a; display: flex; justify-content: space-between; align-items: flex-end; }
+        
+        .production-grid { padding: 40px 8%; display: grid; grid-template-columns: 1fr 1fr; gap: 30px; }
+        .video-card { background: #0a0a0a; border: 1px solid #1a1a1a; border-radius: 4px; padding: 10px; position: relative; }
+        .video-card:hover { border-color: #a855f7; }
+
+        canvas { width: 100%; display: block; filter: saturate(1.2) contrast(1.1); }
+        .render-info { padding: 15px; display: flex; justify-content: space-between; align-items: center; }
+        .tag { font-size: 10px; color: #a855f7; border: 1px solid #a855f7; padding: 2px 8px; border-radius: 3px; }
+    </style>
+</head>
+<body>
+    <header class="studio-header">
+        <div>
+            <h1 style="font-size: 50px; letter-spacing: -3px; margin: 0;">Production <span style="color:#a855f7">Sync</span></h1>
+            <p style="color: #444;">Frame-by-frame professional frequency adjustment.</p>
+        </div>
+        <div style="font-size: 12px; color: #a855f7; font-weight: 800;">[ RENDER_STATION_01 ]</div>
+    </header>
+
+    <main class="production-grid" id="edit-gallery"></main>
+
+    <script type="module">
+        import { db, applyEliteWatermark } from './config.js';
+import { doc, onSnapshot, collection, getDocs, query, orderBy } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+// 1. SET THE FILE ID (Must match the name in sidebar)
+const PAGE_ID = "minecraft"; 
+
+// 2. SYNC GLOBAL DESIGN API
+onSnapshot(doc(db, "settings", "global_styles"), (s) => {
+    if(s.exists()){
+        document.documentElement.style.setProperty('--purple', s.data().color);
+        document.body.style.fontFamily = s.data().font;
+    }
+});
+
+// 3. SYNC PAGE TEXT (Smallest Detail)
+onSnapshot(doc(db, "settings", PAGE_ID), (s) => {
+    if(s.exists()){
+        if(document.getElementById('live-h1')) document.getElementById('live-h1').innerHTML = s.data().h1;
+        if(document.getElementById('live-p')) document.getElementById('live-p').innerText = s.data().p;
+    }
+});
+
+// 4. LOAD ASSETS (Metadata Aware)
+async function load() {
+    const snap = await getDocs(query(collection(db, PAGE_ID + "_portfolio"), orderBy("timestamp", "desc")));
+    const container = document.getElementById('gallery');
+    snap.forEach(d => {
+        const data = d.data();
+        const id = `cvs-${d.id}`;
+        // Use the Niche and Video Link here
+        container.innerHTML += `
+            <div class="card">
+                <canvas id="${id}"></canvas>
+                <h3>${data.title}</h3>
+                <p style="color:var(--purple); font-size:12px;">Type: ${data.niche}</p>
+                <a href="${data.video}" target="_blank" class="btn-view">VIEW PROJECT</a>
+            </div>`;
+        applyEliteWatermark(id, data.link);
+    });
+}
+load();
+    </script>
+</body>
+</html>

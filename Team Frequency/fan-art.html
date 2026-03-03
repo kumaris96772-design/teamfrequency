@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>TF // Creative Exhibition</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        body { background: #020202; color: #fff; }
+        .gallery-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); gap: 50px; padding: 120px 8%; }
+        
+        .art-frame { 
+            background: #000; padding: 20px; border: 1px solid #1a1a1a; position: relative;
+            box-shadow: 0 0 40px rgba(168, 85, 247, 0.1); transition: 0.5s;
+        }
+        .art-frame:hover { border-color: var(--purple); box-shadow: 0 0 60px rgba(168, 85, 247, 0.3); }
+        
+        /* Neon Glow behind art */
+        .art-frame::before { content: ""; position: absolute; top:0; left:0; width:100%; height:100%; background: var(--purple); opacity: 0; transition: 0.5s; filter: blur(50px); z-index: -1; }
+        .art-frame:hover::before { opacity: 0.2; }
+
+        canvas { width: 100%; display: block; border-radius: 2px; }
+        .placard { margin-top: 20px; padding-left: 15px; border-left: 3px solid var(--purple); }
+        .placard h4 { margin: 0; font-size: 18px; text-transform: uppercase; letter-spacing: 2px; }
+    </style>
+</head>
+<body>
+    <nav><a href="index.html" class="logo">TF <span>GALLERY</span></a></nav>
+
+    <main class="gallery-grid" id="art-wall"></main>
+
+    <script type="module">
+        import { db, applyEliteWatermark } from './config.js';
+        import { collection, getDocs, query, orderBy } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+        async function load() {
+            const snap = await getDocs(query(collection(db, "fanart"), orderBy("timestamp", "desc")));
+            const container = document.getElementById('art-wall');
+            snap.forEach(d => {
+                const data = d.data();
+                const id = `art-${d.id}`;
+                container.innerHTML += `
+                    <div class="art-frame">
+                        <canvas id="${id}"></canvas>
+                        <div class="placard">
+                            <h4>${data.title}</h4>
+                            <p style="color:#444; font-size:12px;">Curated by Team Frequency // 2026</p>
+                        </div>
+                    </div>`;
+                applyEliteWatermark(id, data.link);
+            });
+        }
+        load();
+    </script>
+</body>
+</html>

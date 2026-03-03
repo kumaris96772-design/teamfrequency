@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>TF // Timeline Sync</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        body { background: #000; color: #fff; }
+        .board-header { padding: 100px 8% 40px; border-bottom: 1px solid #1a1a1a; }
+        
+        .timeline { padding: 40px 8%; display: flex; flex-direction: column; gap: 20px; }
+        .task-card { 
+            display: flex; align-items: center; gap: 30px; background: #0a0a0c; 
+            border: 1px solid var(--border); padding: 20px; border-radius: 12px;
+            transition: 0.3s;
+        }
+        .task-card:hover { border-color: var(--purple); background: #0f0a14; }
+        
+        .time-tag { background: var(--purple); color: #fff; padding: 5px 12px; font-weight: 800; font-size: 10px; border-radius: 4px; }
+        canvas { width: 250px; height: 140px; object-fit: cover; border-radius: 8px; border: 1px solid #1a1a1a; }
+        .details h2 { margin: 0; font-size: 22px; letter-spacing: -1px; }
+    </style>
+</head>
+<body>
+    <nav><a href="index.html" class="logo">TF <span>PLAN</span></a></nav>
+
+    <header class="board-header">
+        <h1>Timeline <span style="color:var(--purple)">Sync</span></h1>
+        <p style="color: #444;">Strategic scheduling for maximum content impact.</p>
+    </header>
+
+    <main class="timeline" id="task-list"></main>
+
+    <script type="module">
+        import { db, applyEliteWatermark } from './config.js';
+        import { collection, getDocs, query, orderBy } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+        async function load() {
+            const snap = await getDocs(query(collection(db, "scheduling"), orderBy("timestamp", "desc")));
+            const container = document.getElementById('task-list');
+            snap.forEach(d => {
+                const data = d.data();
+                const id = `task-${d.id}`;
+                container.innerHTML += `
+                    <div class="task-card">
+                        <div class="time-tag">SYNC_STABLE</div>
+                        <canvas id="${id}"></canvas>
+                        <div class="details">
+                            <h2>${data.title}</h2>
+                            <p style="color:#555; font-size:12px;">Deployment: COMPLETED // Priority: CRITICAL</p>
+                        </div>
+                    </div>`;
+                applyEliteWatermark(id, data.link);
+            });
+        }
+        load();
+    </script>
+</body>
+</html>

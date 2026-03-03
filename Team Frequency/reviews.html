@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Reviews // Team Frequency</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .review-header { padding: 180px 8% 60px; text-align: center; }
+        .review-header h1 { font-size: clamp(40px, 8vw, 100px); letter-spacing: -0.05em; line-height: 0.9; }
+        .review-header h1 i { font-family: var(--font-heading); color: var(--purple); font-style: italic; }
+
+        .reviews-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(380px, 1fr)); gap: 20px; padding: 0 8% 100px; }
+        
+        .review-card { 
+            background: var(--card); border: 1px solid var(--border); border-radius: 32px; 
+            padding: 50px 40px; transition: 0.5s; position: relative;
+        }
+        .review-card:hover { border-color: #fff; transform: translateY(-5px); }
+        
+        .stars { color: var(--yellow); font-size: 10px; margin-bottom: 25px; letter-spacing: 5px; }
+        .quote { font-family: var(--font-heading); font-size: 32px; line-height: 1.1; color: #fff; margin-bottom: 30px; font-style: italic; letter-spacing: -1px; }
+        
+        .reviewer { display: flex; align-items: center; gap: 15px; border-top: 1px solid rgba(255,255,255,0.05); padding-top: 25px; }
+        .rev-avatar { width: 45px; height: 45px; background: linear-gradient(45deg, var(--purple), #000); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 14px; color: #fff; border: 1px solid var(--border); }
+        .rev-info h4 { font-size: 16px; margin: 0; letter-spacing: -0.5px; }
+        .rev-info p { font-size: 11px; color: var(--text-dim); text-transform: uppercase; letter-spacing: 2px; font-weight: 800; }
+
+        .status-badge { position: absolute; top: 40px; right: 40px; font-size: 9px; color: var(--purple); font-weight: 800; letter-spacing: 2px; background: rgba(168, 85, 247, 0.05); padding: 4px 12px; border-radius: 100px; }
+    </style>
+</head>
+<body>
+    <div class="grid-overlay"></div>
+    <nav>
+        <a href="index.html" class="logo">TF <span>REVIEWS</span></a>
+        <a href="index.html#proposal" class="btn-sync">Establish Sync</a>
+    </nav>
+
+    <header class="review-header">
+        <p style="color:var(--purple); font-weight: 800; letter-spacing: 4px; margin-bottom: 20px;">[ SOCIAL_RESONANCE_VERIFIED ]</p>
+        <h1>Creators <i>Commending</i> <br> Our Global Signal.</h1>
+    </header>
+
+    <main class="reviews-grid" id="reviews-root">
+        <!-- Review Cards Load Dynamically from Firebase -->
+    </main>
+
+    <script type="module">
+        import { db } from './config.js';
+        import { collection, getDocs, query, orderBy } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+        async function fetchReviews() {
+            const snap = await getDocs(query(collection(db, "reviews"), orderBy("timestamp", "desc")));
+            const root = document.getElementById('reviews-root');
+            root.innerHTML = "";
+
+            snap.forEach(d => {
+                const data = d.data();
+                root.innerHTML += `
+                    <div class="review-card">
+                        <div class="status-badge">SIGNAL_VERIFIED</div>
+                        <div class="stars">★★★★★</div>
+                        <div class="quote">"${data.link}"</div>
+                        <div class="reviewer">
+                            <div class="rev-avatar">${data.title.charAt(0)}</div>
+                            <div class="rev-info">
+                                <h4>${data.title}</h4>
+                                <p>Partnered Content Creator</p>
+                            </div>
+                        </div>
+                    </div>`;
+            });
+        }
+        fetchReviews();
+    </script>
+</body>
+</html>

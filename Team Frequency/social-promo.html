@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Social Media Promotion // Elite Studio</title>
+    <style>
+        body { background: #fafafa; color: #262626; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto; margin: 0; }
+        .nav-insta { background: #fff; border-bottom: 1px solid #dbdbdb; padding: 15px 8%; text-align: center; position: sticky; top: 0; z-index: 10; }
+        .feed { max-width: 500px; margin: 20px auto; padding-bottom: 100px; }
+        .post { background: #fff; border: 1px solid #dbdbdb; margin-bottom: 20px; border-radius: 8px; overflow: hidden; }
+        .post-header { padding: 10px; display: flex; align-items: center; gap: 10px; font-weight: bold; font-size: 14px; }
+        .post-header .circle { width: 30px; height: 30px; background: linear-gradient(45deg, #f09433, #e6683c, #dc2743, #cc2366, #bc1888); border-radius: 50%; }
+        canvas { width: 100%; display: block; }
+        .post-content { padding: 15px; }
+        .actions { display: flex; gap: 15px; font-size: 20px; margin-bottom: 10px; }
+    </style>
+</head>
+<body>
+    <div class="nav-insta"><b>ELITE_SOCIAL_PROMO</b></div>
+    <div class="feed" id="social-gallery"></div>
+
+    <!-- Inside minecraft.html -->
+<script type="module">
+    import { db, applyEliteWatermark } from './config.js';
+    import { collection, getDocs, query, orderBy } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+    async function load() {
+        const snap = await getDocs(query(collection(db, "minecraft"), orderBy("timestamp", "desc")));
+        const container = document.getElementById('gallery');
+        snap.forEach(d => {
+            const data = d.data();
+            const canvasId = `cvs-${d.id}`;
+            container.innerHTML += `<div class="mc-card"><canvas id="${canvasId}"></canvas><h3>${data.title}</h3></div>`;
+            
+            // MAGIC: Use the central watermark function
+            applyEliteWatermark(canvasId, data.link);
+        });
+    }
+    load();
+</script>
+</body>
+</html>
