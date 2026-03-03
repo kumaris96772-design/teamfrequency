@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Visual Identity | Team Frequency</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body { background: #000; perspective: 1500px; }
+
+        .design-header { padding: 180px 8% 60px; text-align: center; }
+        
+        .thumbnail-grid { 
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); 
+            gap: 35px; padding: 40px 8% 100px;
+        }
+
+        /* --- THE AUTONOMIC 3D CARD --- */
+        .design-card {
+            background: #0d0d0f; border: 1px solid var(--border); border-radius: 30px;
+            padding: 20px; transition: border-color 0.4s;
+            position: relative; transform-style: preserve-3d;
+            cursor: pointer;
+            /* Auto-floating animation */
+            animation: autoFloat 6s ease-in-out infinite;
+        }
+
+        /* Off-sync animation for variety */
+        .design-card:nth-child(even) { animation-delay: -3s; }
+
+        @keyframes autoFloat {
+            0%, 100% { transform: translateY(0px) rotateX(0deg) rotateY(0deg); }
+            25% { transform: translateY(-10px) rotateX(2deg) rotateY(2deg); }
+            50% { transform: translateY(0px) rotateX(-2deg) rotateY(-2deg); }
+            75% { transform: translateY(10px) rotateX(1deg) rotateY(-1deg); }
+        }
+
+        .design-card:hover { 
+            border-color: var(--purple); 
+            animation-play-state: paused; /* Stop auto-float on hover to allow manual 3D tilt */
+            box-shadow: 0 20px 50px rgba(168, 85, 247, 0.2);
+        }
+
+        .id-badge {
+            position: absolute; top: 30px; left: 30px;
+            font-family: monospace; font-size: 10px; font-weight: 800;
+            background: #000; border: 1px solid var(--border);
+            padding: 4px 10px; border-radius: 5px; z-index: 10; color: var(--purple);
+        }
+
+        .canvas-container { width: 100%; aspect-ratio: 16/9; border-radius: 20px; overflow: hidden; background: #000; transform: translateZ(30px); }
+        canvas { width: 100%; display: block; }
+
+        .card-meta { padding: 25px 10px 10px; }
+        .card-meta h3 { font-size: 24px; letter-spacing: -1px; margin: 0; color: #fff; }
+        .card-meta p { color: var(--text-dim); font-size: 13px; margin-top: 5px; }
+
+    </style>
+</head>
+<body>
+
+    <nav>
+        <a href="index.html" class="logo">TF <span>IDENTITY</span></a>
+        <a href="work.html" class="nav-link">Intel Registry</a>
+    </nav>
+
+    <header class="design-header">
+        <p style="color:var(--purple); font-weight:800; letter-spacing:5px;">[ KINETIC_DATA_STREAMS ]</p>
+        <h1 style="font-size: 55px; letter-spacing: -3px;">Visual <span>Identity</span> Hub</h1>
+    </header>
+
+    <main class="thumbnail-grid" id="designContainer"></main>
+
+    <script type="module">
+        import { db, applyEliteWatermark } from './config.js';
+        import { collection, getDocs, query, orderBy } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+        async function loadThumbnails() {
+            const container = document.getElementById('designContainer');
+            const snap = await getDocs(query(collection(db, "designing"), orderBy("timestamp", "desc")));
+            
+            container.innerHTML = "";
+
+            snap.forEach(d => {
+                const data = d.data();
+                const id = `cvs-${d.id}`;
+                const shortID = `TF-${d.id.substring(0, 4).toUpperCase()}`;
+
+                const card = document.createElement('div');
+                card.className = 'design-card';
+                card.innerHTML = `
+                    <div class="id-badge">${shortID}</div>
+                    <div class="canvas-container">
+                        <canvas id="${id}"></canvas>
+                    </div>
+                    <div class="card-meta">
+                        <h3>${data.title}</h3>
+                        <p>${data.niche || 'General Creative'}</p>
+                    </div>
+                `;
+
+                // Link to Project Viewer
+                card.onclick = () => {
+                    location.href = `project-viewer.html?id=${d.id}&cat=designing`;
+                };
+
+                container.appendChild(card);
+                applyEliteWatermark(id, data.link);
+
+                // --- MANUAL 3D TILT ON MOUSE MOVE ---
+                card.addEventListener('mousemove', (e) => {
+                    const rect = card.getBoundingClientRect();
+                    const x = e.clientX - rect.left;
+                    const y = e.clientY - rect.top;
+                    const centerX = rect.width / 2;
+                    const centerY = rect.height / 2;
+                    const rotateX = (y - centerY) / 10;
+                    const rotateY = (centerX - x) / 10;
+
+                    card.style.transform = `rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale(1.05)`;
+                });
+
+                card.addEventListener('mouseleave', () => {
+                    card.style.transform = `rotateX(0deg) rotateY(0deg) scale(1)`;
+                });
+            });
+        }
+        loadThumbnails();
+    </script>
+</body>
+</html>

@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Deep View // Team Frequency</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        body { background: #000; height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
+        .viewer-layout { flex: 1; display: grid; grid-template-columns: 1fr 450px; padding-top: 80px; }
+
+        /* Left: X-Ray Scanner */
+        .visual-pane { padding: 60px; display: flex; flex-direction: column; justify-content: center; border-right: 1px solid var(--border); }
+        .scanner-frame { width: 100%; aspect-ratio: 16/9; border-radius: 30px; position: relative; overflow: hidden; border: 1px solid var(--border); cursor: crosshair; }
+        .layer { position: absolute; inset: 0; background-size: cover; background-position: center; }
+        .layer-raw { filter: grayscale(1) contrast(2) brightness(0.2) blur(10px); opacity: 0.3; }
+        .layer-final { clip-path: circle(0% at 0% 0%); transition: clip-path 0.08s linear; }
+
+        .scanner-frame.is-full { cursor: zoom-out; }
+        .scanner-frame.is-full .layer-final { clip-path: circle(150% at 50% 50%) !important; transition: clip-path 0.6s cubic-bezier(0.19, 1, 0.22, 1); }
+
+        /* Right: Technical Telemetry */
+        .info-pane { padding: 60px; background: #050505; display: flex; flex-direction: column; gap: 40px; }
+        .id-strip { font-family: monospace; font-size: 11px; color: var(--purple); letter-spacing: 3px; font-weight: 800; }
+        
+        .status-light { display: inline-flex; align-items: center; gap: 10px; padding: 10px 20px; border-radius: 100px; font-size: 12px; font-weight: 800; border: 1px solid var(--border); }
+        .light-green { color: #22c55e; background: rgba(34, 197, 94, 0.1); border-color: #22c55e; }
+        .light-red { color: #ef4444; background: rgba(239, 68, 68, 0.1); border-color: #ef4444; }
+
+        .btn-action { display: block; width: 100%; padding: 20px; border-radius: 15px; text-align: center; text-decoration: none; font-weight: 800; background: #fff; color: #000; transition: 0.3s; }
+        .btn-action:hover { background: var(--purple); color: #fff; box-shadow: 0 0 30px var(--purple); }
+    </style>
+</head>
+<body>
+    <nav>
+        <a href="index.html" class="logo">TF <span>DEEP_VIEW</span></a>
+        <a href="designing.html" style="color:#555; text-decoration:none; font-size:12px; font-weight:800;">EXIT_TO_GALLERY</a>
+    </nav>
+
+    <main class="viewer-layout">
+        <section class="visual-pane">
+            <div class="scanner-frame" id="scanner">
+                <div class="layer layer-raw" id="raw-view"></div>
+                <div class="layer layer-final" id="final-view"></div>
+            </div>
+            <p style="text-align:center; color:#333; margin-top:20px; font-size:11px; letter-spacing:3px;">[ HOVER_SCAN • CLICK_EXPAND ]</p>
+        </section>
+
+        <aside class="info-pane">
+            <div>
+                <div class="id-strip" id="p-id">SIGNAL_ID: --</div>
+                <h1 id="p-title" style="font-size: 42px; letter-spacing:-2px; margin: 10px 0;">Loading...</h1>
+                <p id="p-desc" style="color:var(--text-dim); line-height:1.6;">Synchronizing project metadata from Team Frequency core...</p>
+            </div>
+
+            <div id="video-status-box">
+                <!-- Injected via JS -->
+            </div>
+
+            <div style="margin-top: auto;">
+                <a href="index.html#order" class="btn-action">REPLICATE THIS QUALITY</a>
+            </div>
+        </aside>
+    </main>
+
+    <script type="module">
+        import { db } from './config.js';
+        import { doc, getDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+        const params = new URLSearchParams(window.location.search);
+        const id = params.get('id');
+        const cat = params.get('cat');
+
+        async function init() {
+            const snap = await getDoc(doc(db, cat, id));
+            if (snap.exists()) {
+                const data = snap.data();
+                
+                // 1. UI Update
+                document.getElementById('p-id').innerText = `SIGNAL_ID: TF-${id.substring(0,6).toUpperCase()}`;
+                document.getElementById('p-title').innerText = data.title;
+                document.getElementById('p-desc').innerText = data.description || "Project metadata successfully verified. This asset represents a high-frequency creative sync delivered by the TF core team.";
+                document.getElementById('raw-view').style.backgroundImage = `url('${data.link}')`;
+                document.getElementById('final-view').style.backgroundImage = `url('${data.link}')`;
+
+                // 2. Video Status Logic
+                const statusBox = document.getElementById('video-status-box');
+                if(data.video && data.video !== "" && data.video !== "#") {
+                    statusBox.innerHTML = `
+                        <a href="${data.video}" target="_blank" class="status-light light-green" style="text-decoration:none;">
+                            <i class="fas fa-play-circle"></i> SOURCE_SIGNAL_ONLINE
+                        </a>`;
+                } else {
+                    statusBox.innerHTML = `
+                        <div class="status-light light-red">
+                            <i class="fas fa-times-circle"></i> NO_LINK_ATTACHED
+                        </div>`;
+                }
+
+                setupScanner();
+            }
+        }
+
+        function setupScanner() {
+            const sc = document.getElementById('scanner');
+            const final = document.getElementById('final-view');
+            let isFull = false;
+
+            sc.onmousemove = e => {
+                if(isFull) return;
+                const rect = sc.getBoundingClientRect();
+                const x = e.clientX - rect.left;
+                const y = e.clientY - rect.top;
+                final.style.clipPath = `circle(150px at ${x}px ${y}px)`;
+            };
+
+            sc.onclick = () => {
+                isFull = !isFull;
+                sc.classList.toggle('is-full');
+                if(!isFull) final.style.clipPath = `circle(0% at 0% 0%)`;
+            };
+        }
+        init();
+    </script>
+</body>
+</html>

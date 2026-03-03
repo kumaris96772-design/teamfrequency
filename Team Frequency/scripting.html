@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Elite Scripts // Storytelling</title>
+    <style>
+        body { background: #fdfcf0; color: #1a1a1a; font-family: 'Georgia', serif; padding: 100px 15%; }
+        h1 { border-bottom: 2px solid #1a1a1a; padding-bottom: 10px; font-weight: 400; font-size: 40px; }
+        .script-entry { margin-bottom: 80px; }
+        .page-effect { background: #fff; box-shadow: 0 10px 30px rgba(0,0,0,0.05); padding: 50px; border-radius: 5px; position: relative; }
+        .page-effect::before { content: ""; position: absolute; top: 10px; left: 10px; width: 100%; height: 100%; border: 1px solid #ddd; z-index: -1; }
+        canvas { width: 100%; filter: sepia(0.5) contrast(1.1); margin-top: 20px; }
+        .meta { font-family: monospace; color: #888; font-size: 12px; margin-bottom: 20px; }
+    </style>
+</head>
+<body>
+    <h1>Script & Story Logs</h1>
+    <div id="scripts"></div>
+
+    <!-- Inside minecraft.html -->
+<script type="module">
+    import { db, applyEliteWatermark } from './config.js';
+    import { collection, getDocs, query, orderBy } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+    async function load() {
+        const snap = await getDocs(query(collection(db, "minecraft"), orderBy("timestamp", "desc")));
+        const container = document.getElementById('gallery');
+        snap.forEach(d => {
+            const data = d.data();
+            const canvasId = `cvs-${d.id}`;
+            container.innerHTML += `<div class="mc-card"><canvas id="${canvasId}"></canvas><h3>${data.title}</h3></div>`;
+            
+            // MAGIC: Use the central watermark function
+            applyEliteWatermark(canvasId, data.link);
+        });
+    }
+    load();
+</script>
+</body>
+</html>

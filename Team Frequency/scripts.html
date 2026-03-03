@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>TF // Encrypted Scripts</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        body { background: #000; color: #fff; font-family: 'Courier New', monospace; }
+        .archive-header { padding: 100px 8% 40px; text-align: left; border-left: 5px solid var(--purple); margin-left: 8%; }
+        
+        .script-container { padding: 40px 8%; display: flex; flex-direction: column; gap: 40px; }
+        .data-packet { 
+            background: #0a0a0c; border: 1px solid var(--border); padding: 40px; 
+            border-radius: 4px; position: relative; overflow: hidden;
+        }
+        .data-packet::before { content: "TOP_SECRET"; position: absolute; top: 10px; right: 10px; font-size: 10px; color: var(--purple); opacity: 0.5; }
+        
+        canvas { width: 100%; filter: saturate(0) contrast(1.5) brightness(0.8); border: 1px solid #222; margin-top: 20px; }
+        .meta-line { font-size: 12px; color: var(--purple); margin-bottom: 10px; font-weight: bold; }
+        h2 { letter-spacing: 2px; text-transform: uppercase; }
+    </style>
+</head>
+<body>
+    <nav>
+        <a href="index.html" class="logo">TF <span>SCRIPTS</span></a>
+        <a href="order.html" class="btn-cta">ORDER SCRIPT</a>
+    </nav>
+
+    <header class="archive-header">
+        <h1 style="font-size: 45px; margin: 0;">Narrative <span style="color:var(--purple)">Vault</span></h1>
+        <p style="color: #444;">High-retention storytelling logs. Decrypted for viewing.</p>
+    </header>
+
+    <main class="script-container" id="script-list"></main>
+
+    <script type="module">
+        import { db, applyEliteWatermark } from './config.js';
+        import { collection, getDocs, query, orderBy } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+        async function load() {
+            const snap = await getDocs(query(collection(db, "scripts"), orderBy("timestamp", "desc")));
+            const container = document.getElementById('script-list');
+            snap.forEach(d => {
+                const data = d.data();
+                const id = `pkt-${d.id}`;
+                container.innerHTML += `
+                    <div class="data-packet">
+                        <div class="meta-line">DECRYPT_ID: ${d.id.substring(0,8)} // STATUS: CLEAR</div>
+                        <h2>${data.title}</h2>
+                        <p style="color:#777; font-size:14px; margin-top:10px;">Narrative Structure: High-Frequency retention beats and synchronized story hooks.</p>
+                        <canvas id="${id}"></canvas>
+                    </div>`;
+                applyEliteWatermark(id, data.link);
+            });
+        }
+        load();
+    </script>
+</body>
+</html>

@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>TF // Discord Signal Hub</title>
+    <style>
+        body { background: #050505; color: #fff; font-family: 'Plus Jakarta Sans', sans-serif; display: flex; margin: 0; }
+        .side-panel { width: 280px; background: #0a0a0c; height: 100vh; border-right: 1px solid rgba(168, 85, 247, 0.1); padding: 40px 20px; }
+        .main-stream { flex: 1; height: 100vh; overflow-y: auto; padding: 60px 8%; }
+        
+        .signal-entry { 
+            background: #0d0d0f; border-radius: 20px; border: 1px solid rgba(255,255,255,0.05);
+            padding: 30px; margin-bottom: 25px; transition: 0.3s;
+        }
+        .signal-entry:hover { border-color: #a855f7; background: #110d16; }
+        
+        .waveform { display: flex; gap: 3px; align-items: center; margin-bottom: 15px; }
+        .bar { width: 3px; height: 10px; background: #a855f7; border-radius: 10px; animation: flow 1s infinite alternate; }
+        @keyframes flow { from { height: 5px; } to { height: 20px; } }
+
+        canvas { width: 100%; border-radius: 12px; margin-top: 20px; border: 1px solid #1a1a1a; }
+        h3 { letter-spacing: -1px; font-size: 24px; }
+    </style>
+</head>
+<body>
+    <div class="side-panel">
+        <h2 style="font-size: 18px; letter-spacing: 2px;">CHANNELS</h2>
+        <p style="color: #a855f7; margin-top: 20px; font-weight: 800;"># active-transmissions</p>
+        <p style="color: #444; margin-top: 10px;"># encryption-logs</p>
+    </div>
+
+    <main class="main-stream">
+        <h1>Discord <span style="color:#a855f7">Customization</span></h1>
+        <p style="color: #555; margin-bottom: 50px;">Live logs of community signals established by Team Frequency.</p>
+        <div id="stream-container"></div>
+    </main>
+
+    <script type="module">
+        import { db, applyEliteWatermark } from './config.js';
+        import { collection, getDocs, query, orderBy } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+        async function load() {
+            const snap = await getDocs(query(collection(db, "discord"), orderBy("timestamp", "desc")));
+            const container = document.getElementById('stream-container');
+            snap.forEach(d => {
+                const data = d.data();
+                const id = `ds-${d.id}`;
+                container.innerHTML += `
+                    <div class="signal-entry">
+                        <div class="waveform"><div class="bar"></div><div class="bar" style="animation-delay:0.2s"></div><div class="bar" style="animation-delay:0.4s"></div></div>
+                        <h3>${data.title}</h3>
+                        <canvas id="${id}"></canvas>
+                    </div>`;
+                applyEliteWatermark(id, data.link);
+            });
+        }
+        load();
+    </script>
+</body>
+</html>

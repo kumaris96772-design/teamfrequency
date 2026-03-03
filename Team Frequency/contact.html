@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Concierge // Team Frequency</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .contact-header { padding: 180px 8% 60px; text-align: center; }
+        .contact-header h1 { font-size: clamp(40px, 8vw, 100px); letter-spacing: -0.05em; }
+        .contact-header h1 i { font-family: var(--font-heading); color: var(--purple); font-style: italic; }
+
+        .faq-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); gap: 20px; padding: 40px 8%; }
+        .faq-card { background: var(--card); border: 1px solid var(--border); border-radius: 32px; padding: 40px; transition: 0.4s; }
+        .faq-card:hover { border-color: #fff; }
+        .faq-card h3 { font-size: 20px; margin-bottom: 15px; color: var(--purple); }
+        .faq-card p { color: var(--text-dim); font-size: 15px; line-height: 1.6; }
+
+        /* Updated Discord Card with your Link */
+        .hotline-section { padding: 40px 8% 120px; text-align: center; }
+        .discord-master-card { 
+            max-width: 800px; margin: 0 auto; background: #fff; color: #000; 
+            padding: 80px 40px; border-radius: 40px; text-decoration: none; 
+            display: flex; flex-direction: column; align-items: center; 
+            transition: 0.5s cubic-bezier(0.19, 1, 0.22, 1);
+        }
+        .discord-master-card:hover { background: var(--purple); color: #fff; transform: translateY(-10px); }
+        .discord-master-card i { font-size: 60px; margin-bottom: 30px; }
+        .discord-master-card h2 { font-size: 48px; letter-spacing: -2px; margin: 0; }
+    </style>
+</head>
+<body>
+    <div class="grid-overlay"></div>
+    <nav>
+        <a href="index.html" class="logo">TF <span>CONCIERGE</span></a>
+        <a href="index.html#proposal" class="btn-sync">Establish Sync</a>
+    </nav>
+
+    <header class="contact-header">
+        <p style="color:var(--purple); font-weight: 800; letter-spacing: 5px;">[ 24/7_SUPPORT_STATION ]</p>
+        <h1>Synchronizing <i>Support</i> <br> & Global Outreach.</h1>
+    </header>
+
+    <section class="faq-grid">
+        <div class="faq-card">
+            <h3>Typical project duration?</h3>
+            <p>Standard production is delivered within 4-7 days. Emergency signals are processed within 48 hours.</p>
+        </div>
+        <div class="faq-card">
+            <h3>Communication protocols?</h3>
+            <p>Once a signal is established, we move to a private Discord channel for real-time synchronization.</p>
+        </div>
+    </section>
+
+    <!-- LIVE DISCORD HOTLINE -->
+    <section class="hotline-section">
+        <p style="color:#333; font-weight: 800; letter-spacing: 5px; margin-bottom: 30px;">[ PRIMARY_SIGNAL_CHANNEL ]</p>
+        <a href="https://discord.gg/fqfRQfyjRt" target="_blank" class="discord-master-card">
+            <i class="fab fa-discord"></i>
+            <h4 style="font-size: 12px; font-weight: 800; text-transform: uppercase; letter-spacing: 4px; margin-bottom: 10px;">Global Direct Access</h4>
+            <h2>Enter the <i>Frequency</i> HQ</h2>
+            <p style="margin-top: 20px; font-weight: 600; opacity: 0.8;">Join the official Team Frequency Server.</p>
+        </a>
+    </section>
+
+    <footer style="text-align: center; padding: 60px; color: #222; font-size: 12px; border-top: 1px solid var(--border);">
+        <p>&copy; 2026 TEAM FREQUENCY. All systems synchronized.</p>
+    </footer>
+</body>
+</html>

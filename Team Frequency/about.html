@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>About Us | Team Frequency</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .about-hero { padding: 180px 8% 60px; text-align: center; }
+        .about-hero h1 { font-size: clamp(40px, 8vw, 100px); letter-spacing: -4px; line-height: 0.9; }
+        
+        .staff-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); gap: 20px; padding: 40px 8% 100px; }
+        .staff-card { 
+            background: #0d0d0f; border: 1px solid rgba(255,255,255,0.05); border-radius: 32px; padding: 40px;
+            transition: 0.5s; position: relative;
+        }
+        .staff-card:hover { border-color: var(--purple); transform: translateY(-10px); }
+        .founder-tag { background: var(--purple); color: #000; font-weight: 900; font-size: 10px; padding: 4px 12px; border-radius: 100px; position: absolute; top: 30px; right: 30px; }
+        
+        .staff-img { width: 80px; height: 80px; border-radius: 50%; border: 2px solid var(--border); background-size: cover; margin-bottom: 20px; }
+        .staff-card h3 { font-size: 24px; letter-spacing: -1px; margin-bottom: 5px; }
+        .staff-card p { color: #555; font-size: 14px; line-height: 1.6; }
+    </style>
+</head>
+<body>
+    <div class="grid-overlay"></div>
+    <nav>
+        <a href="index.html" class="logo">TF <span>CORE</span></a>
+        <a href="index.html" class="btn-sync" style="background:transparent; border:1px solid #222; color:#fff; padding:10px 25px; border-radius:50px; text-decoration:none; font-weight:700;">Back to Hub</a>
+    </nav>
+
+    <header class="about-hero">
+        <h1 id="live-h1">...</h1>
+        <p id="live-p" style="color:var(--text-dim); margin-top:20px; max-width:600px; margin-left:auto; margin-right:auto;"></p>
+    </header>
+
+    <div class="section-title"><span>#</span> Our Specialists</div>
+    <main class="staff-grid" id="staff-root"></main>
+
+    <script type="module">
+        import { db } from './config.js';
+        import { doc, onSnapshot, collection, getDocs, query, orderBy } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+        // 1. Sync About Us Text
+        onSnapshot(doc(db, "settings", "about"), (s) => {
+            if(s.exists()){
+                document.getElementById('live-h1').innerHTML = s.data().h1;
+                document.getElementById('live-p').innerText = s.data().p;
+            }
+        });
+
+        // 2. Load Staff Members
+        async function fetchStaff() {
+            const root = document.getElementById('staff-root');
+            const snap = await getDocs(query(collection(db, "staff"), orderBy("timestamp", "asc")));
+            root.innerHTML = "";
+            snap.forEach(d => {
+                const s = d.data();
+                root.innerHTML += `
+                    <div class="staff-card">
+                        ${s.founder ? '<div class="founder-tag">FOUNDER</div>' : ''}
+                        <div class="staff-img" style="background-image: url('${s.link}')"></div>
+                        <h3>${s.name}</h3>
+                        <p style="color:var(--purple); font-weight:800; font-size:11px; margin-bottom:15px;">${s.role} // SINCE ${s.date}</p>
+                        <p>${s.desc}</p>
+                    </div>`;
+            });
+        }
+        fetchStaff();
+    </script>
+</body>
+</html>
